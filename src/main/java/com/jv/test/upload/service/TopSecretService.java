@@ -8,19 +8,26 @@ import org.springframework.stereotype.Component;
 @Scope(value=ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TopSecretService extends AbstractObservableAdapter<String> {
 	
-	public void ultraComplexBusinessLogic() { 
-		
-		for (int i = 0; i <= 100; i++) {
-		
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			notifyObservers(String.valueOf(i));
+	public void ultraComplexBusinessLogicInALoop() {
+		final int TOTAL_LOOP_COUNT = 500;		
+		for (int i = 0; i <= TOTAL_LOOP_COUNT; i++) {
+			ultraComplexBusinessLogic();
+			notifyObservers(String.valueOf(calculatePercentage(i, TOTAL_LOOP_COUNT)));
 		}
 		
+	}
+	
+	
+	protected void ultraComplexBusinessLogic() { 
+		try {
+			Thread.sleep(25);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected int calculatePercentage(int current, int total) {
+		return (int)(((double)current/total)*100);
 	}
 
 

@@ -24,7 +24,7 @@ public class ProcessWebSocketHandler extends TextWebSocketHandler {
 	public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
 		
 		service.clearObservers().registerObserver(new WebSocketObserver(session));
-		service.ultraComplexBusinessLogic();		
+		service.ultraComplexBusinessLogicInALoop();		
 		session.close(CloseStatus.NORMAL);
 	
 	}

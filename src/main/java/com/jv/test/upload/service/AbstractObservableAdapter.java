@@ -21,9 +21,6 @@ public abstract class AbstractObservableAdapter<T> implements Observable<T> {
 		for (Observer<T> observer : observers) { 
 			observer.receiveNotification(notification);
 		}		
-	}
-	
-	
-	
+	}	
 
 }
