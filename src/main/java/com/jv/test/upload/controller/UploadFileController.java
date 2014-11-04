@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.jv.test.upload.domain.FileMeta;
+
 @Controller
 @RequestMapping("/upload")
 public class UploadFileController {

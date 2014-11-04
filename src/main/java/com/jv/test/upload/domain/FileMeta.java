@@ -1,4 +1,4 @@
-package com.jv.test.upload.controller;
+package com.jv.test.upload.domain;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 

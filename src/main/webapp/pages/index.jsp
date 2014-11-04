@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="eng">
 	<head>
 	
 		<!-- JQuery stuff -->
@@ -73,7 +74,7 @@
 			    <br/><br/>
 			    
 			  	<div id="uploaded-files-container">
-	 				<table id="uploaded-files" class="table">
+	 				<table id="uploaded-files" class="table table-striped">
 		        		<tr>
 		            		<th>File Name</th>
 		            		<th>File Size</th>
@@ -169,23 +170,15 @@
 			        dropZone: $('#fileupload_dropzone')        
 			        
 			    });
-				/* End File Upload Component */		    
+				/* End File Upload Component */
 				
-				/* Init Process Dialog */
-// 				$("#processPanel").dialog({
-// 					modal:true,
-// 					autoOpen:false,
-// 					show: {
-// 				        effect: 'fade',
-// 				        duration: 2000
-// 				    },
-// 				    hide: {
-// 				        effect: 'fade',
-// 				        duration: 500
-// 				    }
-// 				});
-				/* Init Process Dialog */
-			
+				$("#processPanel").on("hidden.bs.modal", function() { 
+					
+					$('#fileupload_progressBar').css('width', '0%');	
+					updateProcessingFileNameAttribute("");
+					
+				});
+				
 			});
 			
 			
@@ -194,29 +187,65 @@
 				var socket = new SockJS('<%= request.getContextPath() %>/controller/process');				
 				socket.onopen = function() {
 					console.log('web socket opened...');
-					socket.send('process');				
-					$(event.srcElement || event.target).text("Processing").css("color", "yellow").unbind("click");
-					$("#processPanel_bar").css('width', '0%');					
-					$("#panel-body-fileName").html(fileName);
-					$("#processPanel").modal('show');					
-					this.fileName = fileName;
+					socket.send("{\"action\": \"START\", \"fileName\": \"" + fileName +"\"}");
+					
+					var clickedElement = $(event.srcElement || event.target);					
+					clickedElement.text("Processing").css("color", "navy").unbind("click");
+					this.clickedElement = clickedElement;
+										
+					updateProcessBarProgress(0);					
+					updateProcessingFileNameDisplay(fileName);
+					updateProcessingFileNameAttribute(fileName);
+					
+					$("#processPanel").modal('show');				
+										
 				};
 				socket.onclose = function() {
 					console.log('web socket closed...');
 				};
 				socket.onmessage = function(e) { 
 					var message = e.data;
-					console.log('received message: ' + message)
-					$("#processPanel_bar").css('width', message + '%');
-					if (message == 100) { 
-						$("#processPanel").modal('hide');												
-						showAlert("Process completed for file: " + this.fileName);						
-						var eventElement = $(event.srcElement || event.target);
-						$(eventElement).css("color", "green").css("cursor", "default").html("Processed").unbind("click");
+					var notification = eval("(" + message + ")");
+					console.log('received message: ' + message)					
+										
+					var processingFileName = getProcessingFileNameAttribute();
+					var isCurrentlyOnModalFrame = notification.fileName == processingFileName;
+					if (isCurrentlyOnModalFrame) {					
+						updateProcessBarProgress(notification.percentage); 
+					} else { 
+						updateInlineProgress(notification.percentage, this.clickedElement);
 					}
+					if (notification.percentage == 100) {
+						if (isCurrentlyOnModalFrame) { 
+							$("#processPanel").modal('hide');
+						}
+						showAlert("Process completed for file: " + notification.fileName);					
+						this.clickedElement.css("color", "green").css("cursor", "default").html("Processed").unbind("click");
+					}
+					
 				}
 				   		
 			}
+			 
+			 function updateProcessBarProgress(percentage) { 
+				 $("#processPanel_bar").css('width', percentage + '%');
+			 }
+			 
+			 function updateInlineProgress(percentage, element) { 
+				 element.html("Processing (" + percentage + "%)");
+			 }
+			 
+			 function updateProcessingFileNameDisplay(fileName) { 
+				 $("#panel-body-fileName").html(fileName);
+			 }
+			 
+			 function updateProcessingFileNameAttribute(fileName) { 
+				 $("#processPanel").attr("fileName", fileName);
+			 }
+			 
+			 function getProcessingFileNameAttribute() { 
+				 return $("#processPanel").attr("fileName");
+			 }
 		
 		
 		</script>

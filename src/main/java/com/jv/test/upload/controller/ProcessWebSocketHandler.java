@@ -8,28 +8,28 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jv.test.upload.domain.TopSecretServiceState;
 import com.jv.test.upload.service.TopSecretService;
 import com.jv.test.upload.service.WebSocketObserver;
 
 public class ProcessWebSocketHandler extends TextWebSocketHandler {
 	
-	private final TopSecretService service;
-	
 	@Autowired
-	public ProcessWebSocketHandler(TopSecretService service) {
-		this.service = service;		
-	}
+	private TopSecretService service;
 	
-	@Override
+	@Override	
 	public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
 		
-		service.clearObservers().registerObserver(new WebSocketObserver(session));
-		service.ultraComplexBusinessLogicInALoop();		
+		String msg = message.getPayload();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		TopSecretServiceState state = mapper.readValue(msg, TopSecretServiceState.class);
+		
+		service.executeWithObserver(state, new WebSocketObserver(session));
 		session.close(CloseStatus.NORMAL);
 	
 	}
-	
-	
 
 
 }
